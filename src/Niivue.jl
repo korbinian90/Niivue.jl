@@ -4,9 +4,10 @@ using Bonito
 
 export niivue, use_electron_display
 
-function niivue(; width=400, height=400)
-    methods = Observable(["setCrosshairWidth", 5])
-    opts = Observable(["isColorbar", false])
+function niivue(volumes; width=400, height=400, opts=Tuple[], methods=Tuple[])
+    push!(methods, ("loadVolumes", volumes))
+    obs_methods = Observable(["setCrosshairWidth", 5])
+    obs_opts = Observable(["isColorbar", false])
 
     nv_dom = DOM.canvas(id="gl"; width, height)
 
@@ -25,15 +26,22 @@ function niivue(; width=400, height=400)
                 nv.opts[method] = arg
                 nv.updateGLVolume()
             }
-            Bonito.onany([$methods], nv_method)
-            Bonito.onany([$opts], nv_opts)
+            for (const opt of $opts) {
+                nv.opts[opt[0]] = opt[1]
+            }
+            for (const method of $methods) {
+                nv[method[0]](method[1])
+            }
+            nv.updateGLVolume()
+            Bonito.onany([$obs_methods], nv_method)
+            Bonito.onany([$obs_opts], nv_opts)
         })
     """
 
     app = App() do session
         DOM.div(nv_dom, evaljs(session, js_eval))
     end
-    return NiivueViewer(app, methods, opts)
+    return NiivueViewer(app, obs_methods, obs_opts)
 end
 
 struct NiivueViewer
