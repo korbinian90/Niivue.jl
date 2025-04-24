@@ -4,8 +4,11 @@ using Bonito
 
 export niivue, use_electron_display
 
-function niivue(volumes; width=400, height=400, opts=Tuple[], methods=Tuple[])
-    push!(methods, ("loadVolumes", volumes))
+function niivue(volumes=[]; width=400, height=400, opts=Tuple[], methods=Tuple[])
+    if !isempty(volumes)
+        methods = vcat(methods, ("loadVolumes", volumes))
+    end
+    
     obs_methods = Observable(["setCrosshairWidth", 5])
     obs_opts = Observable(["isColorbar", false])
 
