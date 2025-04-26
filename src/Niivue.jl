@@ -66,6 +66,12 @@ struct NiivueViewer
 end
 
 function resolve_volumes(volumes)
+    if !(volumes isa AbstractVector)
+        volumes = [volumes]
+    end
+    # convert strings to Dict{Symbol, Any}(:url => v)
+    volumes = [(v isa String ? Dict{Symbol, Any}(:url => v) : v) for v in volumes]
+
     # convert to Dict{Symbol, Any}
     volumes = [Dict{Symbol, Any}(k => v for (k, v) in d) for d in volumes]
     # read local files

@@ -4,10 +4,4 @@
 ## Usage
 using Niivue
 
-volume_local = [
-    Dict(
-        :url => raw"D:\MRSI\data\results2\hc_slurm\maps\Orig\GABA_amp_map.nii",
-    )
-]
-
-nv1 = niivue(volume_local)
+nv1 = niivue(raw"D:\MRSI\data\results2\hc_slurm\maps\Orig\GABA_amp_map.nii")
