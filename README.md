@@ -41,6 +41,8 @@ nv.setCrosshairColor([0,1,1,0.5])
 nv.isColorbar = true
 ```
 
+The [methods](https://niivue.github.io/niivue/devdocs/classes/Niivue.html) (e.g. `nv.setCrosshairWidth(5)`) and [options](https://niivue.github.io/niivue/devdocs/types/NVConfigOptions.html) (e.g. `nv.isColorbar = true`) can be found in the [niivue javascript documentation](https://niivue.github.io/niivue/devdocs/index.html).
+
 ## Electron Display
 
 To use an Electron display, add in the beginning
@@ -55,6 +57,22 @@ In vscode, by default the plot pane is used. To use the Electron display, deacti
 ## Examples
 
 Have a look at the 'examples' subfolder.
+
+## Hacking
+
+Javascript can be directly executed from Julia and the `nv` object is available as `window.nv`
+
+```julia
+using Niivue
+
+nv = niivue()
+width = 10
+js = Niivue.Bonito.js"""
+window.nv.setCrosshairWidth($(width))
+"""
+
+Niivue.Bonito.evaljs(nv.app.session.x, js)
+```
 
 ## Future plans
 
