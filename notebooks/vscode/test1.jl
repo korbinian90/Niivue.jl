@@ -1,5 +1,7 @@
+## Installation
 # import Pkg; Pkg.add(url="https://github.com/korbinian90/Niivue.jl")
 
+## Usage
 using Niivue
 
 volumes = [
@@ -14,11 +16,16 @@ volumes = [
 ]
 
 opts = [("isColorbar", true)]
-methods = [("loadVolumes", volumes)]
+methods = [("setCrosshairWidth", 10)]
 
-nv1 = niivue(volumes; opts)
-nv1.app
+# in vscode: opens plot pane by default (to open in browser: ctr+shift+p -> deactivate plot pane)
+# in REPL: opens browser by default
+nv1 = niivue(volumes; opts, methods)
 
 nv1.setCrosshairWidth(10)
-nv1.isColorbar = true
-# use_electron_display(devtools=true)
+nv1.isColorbar = false
+
+## Use Electron display instead
+# in vscode: ctr+shift+p -> deactivate plot pane
+using Electron
+use_electron_display(devtools=true)

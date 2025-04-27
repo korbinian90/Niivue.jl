@@ -2,7 +2,7 @@
 # import Pkg; Pkg.add(url="https://github.com/korbinian90/Niivue.jl")
 
 ## Usage
-using Niivue, NIfTI
+using Niivue
 
 function create_array(voxel_size=(1, 1, 1), dims=(64, 64, 32))
     test_array = zeros(Float32, dims)

@@ -45,10 +45,7 @@ Calling niivue functions and changing niivue opts
 """
 
 # ╔═╡ f93089e6-3ba3-49cd-b27a-f5f9a95cc17c
-nv1 = niivue();
-
-# ╔═╡ 502f9c02-dbd4-4aa2-80a4-e54ea5e83b58
-nv1.app
+nv1 = niivue()
 
 # ╔═╡ d87d7a67-211e-4390-9e7d-de5b134d1dab
 nv1.loadVolumes([volumes[1]])
@@ -65,10 +62,7 @@ md"""
 """
 
 # ╔═╡ f572804e-95e0-4a16-8034-c1a079e1249e
-nv = niivue();
-
-# ╔═╡ b8544898-59d8-4752-bc37-fbcbbda9b2c3
-nv.app
+nv = niivue()
 
 # ╔═╡ 1a9ecaec-5d0b-4c66-b7c7-4d26d1df5a0e
 nv.loadVolumes(volumes)
@@ -102,13 +96,11 @@ end
 # ╠═0c4f4d85-01fe-44c9-b922-f9b4e827ad6d
 # ╟─849189f1-745f-47da-979d-221d0700157c
 # ╠═f93089e6-3ba3-49cd-b27a-f5f9a95cc17c
-# ╠═502f9c02-dbd4-4aa2-80a4-e54ea5e83b58
 # ╠═d87d7a67-211e-4390-9e7d-de5b134d1dab
 # ╠═96a1e670-abb4-40e2-ae53-d5d171c1c5a1
 # ╠═db95b7d4-f129-4f03-914b-eeae7a94ace9
 # ╟─bb5f65c4-9dd0-4eb9-b588-e4ed22ae2d00
 # ╠═f572804e-95e0-4a16-8034-c1a079e1249e
-# ╠═b8544898-59d8-4752-bc37-fbcbbda9b2c3
 # ╠═1a9ecaec-5d0b-4c66-b7c7-4d26d1df5a0e
 # ╠═ac828ffb-ce20-45e3-b78d-6f455514d3fb
 # ╠═1bb6d6b2-705b-4401-8935-aceff6708224
