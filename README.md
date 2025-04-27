@@ -12,6 +12,15 @@ This should work in almost any julia environment (REPL, vscode, Pluto, Jupyter)
 ```julia
 using Niivue
 
+arr = rand(50,50,20)
+nv = niivue(arr)
+```
+
+## Use settings
+
+```julia
+using Niivue
+
 nv = niivue()
 display(nv.app) ## currently required to display, run in own cell
 
@@ -42,3 +51,11 @@ use_electron_display(devtools=false)
 ```
 
 In vscode, by default the plot pane is used. To use the Electron display, deactivate the plotting pane via the command palette (ctrl+shift+p) -> Julia: Disable Plot Pane
+
+## Examples
+
+Have a look at the 'examples' subfolder.
+
+## Future plans
+
+- use niivue-vscode as alternative pre-configured viewer
