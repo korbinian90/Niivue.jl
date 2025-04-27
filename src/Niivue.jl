@@ -1,12 +1,12 @@
 module Niivue
 
-using Bonito
+using Bonito, NIfTI
 
 export niivue, use_electron_display
 
-function niivue(volumes=[]; width=400, height=400, opts=Tuple[], methods=Tuple[])
+function niivue(volumes=[]; width=400, height=400, opts=Tuple[], methods=Tuple[], ni_args...)
     if !isempty(volumes)
-        volumes = resolve_volumes(volumes)
+        volumes = resolve_volumes(volumes; ni_args...)
         methods = vcat(methods, ("loadVolumes", volumes))
     end
     
@@ -65,22 +65,29 @@ struct NiivueViewer
     opts::Observable
 end
 
-function resolve_volumes(volumes)
+function resolve_volumes(volumes; ni_args...)
     if !(volumes isa AbstractVector)
         volumes = [volumes]
     end
     # convert strings to Dict{Symbol, Any}(:url => v)
-    volumes = [(v isa String ? Dict{Symbol, Any}(:url => v) : v) for v in volumes]
+    volumes = [(!(v isa Dict) ? Dict{Symbol, Any}(:url => v) : v) for v in volumes]
 
     # convert to Dict{Symbol, Any}
     volumes = [Dict{Symbol, Any}(k => v for (k, v) in d) for d in volumes]
-    # read local files
+
     for v in volumes
-        if is_local_file(v[:url])
+        if is_local_file(v[:url]) # read local files
             if !haskey(v, :name)
                 v[:name] = v[:url]
             end
             v[:url] = read(v[:url])
+        elseif v[:url] isa AbstractArray && ndims(v[:url]) > 1 # convert array to NIfTI
+            if !haskey(v, :name)
+                v[:name] = "Image.nii"
+            end
+            buf = IOBuffer()
+            write(buf, NIVolume(v[:url]; ni_args...))
+            v[:url] = buf.data
         end
     end
     return volumes

@@ -5,6 +5,7 @@ version = "1.0.0-DEV"
 
 [deps]
 Bonito = "824d6782-a2ef-11e9-3a09-e5662e0c26f8"
+NIfTI = "a3a9e032-41b5-5fc4-967a-a6b7a19844d3"
 
 [compat]
 Bonito = "4.0.3"
