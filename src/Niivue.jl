@@ -123,5 +123,6 @@ function Base.setproperty!(nv::NiivueViewer, name::Symbol, value)
 end
 
 Base.display(nv::Niivue.NiivueViewer) = Base.display(nv.app)
+Base.show(io::IO, m::MIME"text/html", nv::Niivue.NiivueViewer) = Base.show(io, m, nv.app)
 
 end
