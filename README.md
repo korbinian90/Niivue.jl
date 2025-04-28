@@ -5,6 +5,15 @@
 [![Build Status](https://github.com/korbinian90/Niivue.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/korbinian90/Niivue.jl/actions/workflows/CI.yml?query=branch%3Amain)
 [![Coverage](https://codecov.io/gh/korbinian90/Niivue.jl/branch/main/graph/badge.svg)](https://codecov.io/gh/korbinian90/Niivue.jl)
 
+## Installation
+
+This package is not registered yet. Installation can be performed via
+
+```julia
+import Pkg
+Pkg.add(url="https://github.com/korbinian90/Niivue.jl")
+```
+
 ## Quickstart
 
 This should work in almost any julia environment (REPL, vscode, Pluto, Jupyter)
@@ -15,6 +24,10 @@ using Niivue
 arr = rand(50,50,20)
 nv = niivue(arr)
 ```
+
+## Critical Bugs
+
+- only small arrays working (sending from julia to javascript issue, webfiles are fine)
 
 ## Use settings
 
