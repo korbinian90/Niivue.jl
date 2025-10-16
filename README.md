@@ -51,11 +51,11 @@ nv.setCrosshairColor([0,1,1,0.5])
 nv.isColorbar = true
 ```
 
-The [methods](https://niivue.github.io/niivue/devdocs/classes/Niivue.html) (e.g. `nv.setCrosshairWidth(5)`) and [options](https://niivue.github.io/niivue/devdocs/types/NVConfigOptions.html) (e.g. `nv.isColorbar = true`) can be found in the [niivue javascript documentation](https://niivue.github.io/niivue/devdocs/index.html).
+The [methods](https://niivue.com/docs/api/niivue/classes/Niivue#methods) (e.g. `nv.setCrosshairWidth(5)`) and [options](https://niivue.com/docs/api/nvdocument/type-aliases/NVConfigOptions) (e.g. `nv.isColorbar = true`) can be found in the [niivue javascript documentation](https://niivue.com/docs/).
 
 ## Electron Display
 
-To use an Electron display, add in the beginning
+To use an Electron display instead of the browser, add in the beginning
 
 ```julia
 using Electron
@@ -84,6 +84,21 @@ window.nv.setCrosshairWidth($(width))
 Niivue.Bonito.evaljs(nv.app.session.x, js)
 ```
 
+Return a value from javascript to julia:
+
+```julia
+using Niivue
+
+nv = niivue()
+js_return = Niivue.Bonito.js"""
+window.nv.colormaps()
+"""
+
+cmaps = Niivue.Bonito.evaljs_value(nv.app.session.x, js_return)
+```
+
 ## Future plans
 
 - use niivue-vscode as alternative pre-configured viewer
+- Support access to volumes (e.g. `nv.volumes[1].opacity = 0.3`) and functions with return values (e.g. `cmaps = nv.colormaps()`) directly from julia
+- observable in julia that stores the crosshair location
