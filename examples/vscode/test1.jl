@@ -6,12 +6,13 @@ using Niivue
 
 volumes = [
     Dict(
-        :url => "https://niivue.github.io/niivue/images/mni152.nii.gz",
+        :url => "https://niivue.github.io/niivue-demo-images/mni152.nii.gz",
         :colormap => "gray",
     ),
     Dict(
-        :url => "https://niivue.github.io/niivue/images/hippo.nii.gz",
-        :colormap => "red",
+        :url => "https://niivue.github.io/niivue-demo-images/spmMotor.nii.gz",
+        :colormap => "redyell",
+        :opacity => 0.5
     )
 ]
 
@@ -22,10 +23,12 @@ methods = [("setCrosshairWidth", 10)]
 # in REPL: opens browser by default
 nv1 = niivue(volumes; opts, methods)
 
-nv1.setCrosshairWidth(10)
+# change visualization interactively
+nv1.setCrosshairWidth(1)
 nv1.isColorbar = false
+c = nv1.colormaps()
 
 ## Use Electron display instead
-# in vscode: ctr+shift+p -> deactivate plot pane
+# in vscode: ctr+shift+p -> Julia: Disable Plot Pane
 using Electron
 use_electron_display(devtools=true)

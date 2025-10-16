@@ -25,10 +25,6 @@ arr = rand(50,50,20)
 nv = niivue(arr)
 ```
 
-## Critical Bugs
-
-- only small arrays working (sending from julia to javascript issue, webfiles are fine)
-
 ## Use settings
 
 ```julia
@@ -39,12 +35,13 @@ display(nv.app) ## currently required to display, run in own cell
 
 volumes = [
     Dict(
-        :url => "https://niivue.github.io/niivue/images/mni152.nii.gz",
+        :url => "https://niivue.github.io/niivue-demo-images/mni152.nii.gz",
         :colormap => "gray",
     ),
     Dict(
-        :url => "https://niivue.github.io/niivue/images/hippo.nii.gz", 
-        :colormap => "red",
+        :url => "https://niivue.github.io/niivue-demo-images/spmMotor.nii.gz", 
+        :colormap => "redyell",
+        :opacity => 0.5,
     )
 ]
 

@@ -29,12 +29,13 @@ using Niivue, PlutoUI
 # ╔═╡ 0c4f4d85-01fe-44c9-b922-f9b4e827ad6d
 volumes = [
     Dict(
-        :url => "https://niivue.github.io/niivue/images/mni152.nii.gz",
+        :url => "https://niivue.github.io/niivue-demo-images/mni152.nii.gz",
         :colormap => "gray",
     ),
     Dict(
-        :url => "https://niivue.github.io/niivue/images/hippo.nii.gz",
+        :url => "https://niivue.github.io/niivue-demo-images/spmMotor.nii.gz",
         :colormap => "red",
+        :opacity => 0.5,
     )
 ]
 
