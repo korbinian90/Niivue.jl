@@ -9,6 +9,7 @@ NIfTI = "a3a9e032-41b5-5fc4-967a-a6b7a19844d3"
 
 [compat]
 Bonito = "4.0.3"
+NIfTI = "0.6"
 julia = "1.6.7"
 
 [extras]
