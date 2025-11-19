@@ -5,6 +5,10 @@
 [![Build Status](https://github.com/korbinian90/Niivue.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/korbinian90/Niivue.jl/actions/workflows/CI.yml?query=branch%3Amain)
 [![Coverage](https://codecov.io/gh/korbinian90/Niivue.jl/branch/main/graph/badge.svg)](https://codecov.io/gh/korbinian90/Niivue.jl)
 
+An interactive WebGL based neuroimaging viewer built on top of [Bonito.jl](https://github.com/SimonDanisch/Bonito.jl) and [NiiVue](https://github.com/niivue/niivue).
+
+![ Screenshot of a Niivue.jl view, showing a NIfTI file and random array together. The viewer renders directly in the VS Code plot pane. NiiVue settings can be modified interactively in the REPL](niivue.jl.png)
+
 ## Installation
 
 This package is not registered yet. Installation can be performed via
@@ -30,9 +34,7 @@ nv = niivue(arr)
 ```julia
 using Niivue
 
-nv = niivue()
-display(nv.app) ## currently required to display, run in own cell
-
+# initialization settings
 volumes = [
     Dict(
         :url => "https://niivue.github.io/niivue-demo-images/mni152.nii.gz",
@@ -45,7 +47,9 @@ volumes = [
     )
 ]
 
-nv.loadVolumes(volumes)
+nv = niivue(volumes)
+
+# interactively adapt settings
 nv.setCrosshairWidth(5)
 nv.setCrosshairColor([0,1,1,0.5])
 nv.isColorbar = true
@@ -97,8 +101,15 @@ window.nv.colormaps()
 cmaps = Niivue.Bonito.evaljs_value(nv.app.session.x, js_return)
 ```
 
+## Limitations
+- some functions don't work with the Julian Syntax yet and need to be called via the javascript "hacking" way
+
 ## Future plans
 
 - use niivue-vscode as alternative pre-configured viewer
 - Support access to volumes (e.g. `nv.volumes[1].opacity = 0.3`) and functions with return values (e.g. `cmaps = nv.colormaps()`) directly from julia
 - observable in julia that stores the crosshair location
+
+## Acknowledgements
+
+Development of an initial prototype was supported by Chris Rorden (University of South Carolina)
