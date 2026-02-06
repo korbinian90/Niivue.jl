@@ -10,12 +10,6 @@ CurrentModule = Niivue
 niivue
 ```
 
-## Display Configuration
-
-```@docs
-use_electron_display
-```
-
 ## Types
 
 ```@autodocs
