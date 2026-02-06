@@ -14,6 +14,9 @@ makedocs(;
     ),
     pages=[
         "Home" => "index.md",
+        "Examples" => "examples.md",
+        "Julia-Specific Features" => "julia_features.md",
+        "API Reference" => "api.md",
     ],
 )
 
