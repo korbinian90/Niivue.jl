@@ -77,7 +77,7 @@ For standalone window display:
 
 ```julia
 using Electron
-use_electron_display(devtools=false)
+Electron.use_electron_display(devtools=false)
 
 using Niivue
 nv = niivue(volumes)

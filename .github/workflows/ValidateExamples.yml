@@ -14,6 +14,8 @@ jobs:
   validate-examples:
     name: Validate Example Syntax
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - uses: actions/checkout@v6
       

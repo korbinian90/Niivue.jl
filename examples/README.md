@@ -167,7 +167,7 @@ nv = niivue(volumes)  # Opens in plot pane
 
 # Electron
 using Electron
-use_electron_display()
+Electron.use_electron_display()
 nv = niivue(volumes)  # Opens in Electron window
 
 # Browser (default in REPL)
