@@ -5,7 +5,7 @@ using Test
     @testset "Pluto Examples" begin
         # Test that all Pluto notebooks can be parsed as valid Julia code
         examples_dir = joinpath(@__DIR__, "..", "examples", "Pluto")
-        pluto_files = filter(f -> endswith(f, ".jl") && f != "README.md", readdir(examples_dir))
+        pluto_files = filter(f -> endswith(f, ".jl"), readdir(examples_dir))
         
         for file in pluto_files
             @testset "Parsing $file" begin
