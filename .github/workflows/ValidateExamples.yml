@@ -1,0 +1,68 @@
+name: Validate Examples
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'examples/**'
+  pull_request:
+    paths:
+      - 'examples/**'
+  workflow_dispatch:
+
+jobs:
+  validate-examples:
+    name: Validate Example Syntax
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v6
+      
+      - uses: julia-actions/setup-julia@v2
+        with:
+          version: '1'
+      
+      - name: Check Julia example syntax
+        run: |
+          # Check all .jl files for syntax errors
+          find examples -name "*.jl" -type f | while read file; do
+            echo "Checking syntax: $file"
+            julia -e "include(\"$file\")" --check-syntax || exit 1
+          done
+        continue-on-error: true
+      
+      - name: Validate Pluto notebooks
+        run: |
+          # Install Pluto (without running it)
+          julia -e 'using Pkg; Pkg.add("Pluto")'
+          
+          # Check that Pluto notebooks can be parsed
+          for file in examples/Pluto/*.jl; do
+            echo "Validating Pluto notebook: $file"
+            # Just check that the file is valid Julia syntax
+            julia --check-syntax "$file" || exit 1
+          done
+      
+      - name: Check for broken links in examples
+        run: |
+          echo "Checking for common broken link patterns..."
+          # Check for localhost URLs that shouldn't be in examples
+          if grep -r "localhost" examples/ --include="*.jl" --include="*.md"; then
+            echo "Warning: Found localhost URLs in examples"
+            exit 1
+          fi
+          echo "No obvious broken links found"
+        continue-on-error: true
+      
+      - name: Verify example README files exist
+        run: |
+          if [ ! -f "examples/README.md" ]; then
+            echo "Error: examples/README.md is missing"
+            exit 1
+          fi
+          if [ ! -f "examples/Pluto/README.md" ]; then
+            echo "Error: examples/Pluto/README.md is missing"
+            exit 1
+          fi
+          echo "All required README files found"

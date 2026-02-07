@@ -63,7 +63,7 @@ To use an Electron display instead of the browser, add in the beginning
 
 ```julia
 using Electron
-use_electron_display(devtools=false)
+Electron.use_electron_display(devtools=false)
 ```
 
 In vscode, by default the plot pane is used. To use the Electron display, deactivate the plotting pane via the command palette (ctrl+shift+p) -> Julia: Disable Plot Pane

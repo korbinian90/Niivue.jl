@@ -2,8 +2,69 @@ module Niivue
 
 using Bonito, NIfTI
 
-export niivue, use_electron_display
+export niivue
 
+"""
+    niivue(volumes=[]; width=400, height=400, opts=Tuple[], methods=Tuple[], ni_args...)
+
+Create an interactive NiiVue viewer for neuroimaging data.
+
+# Arguments
+- `volumes`: Volume(s) to display. Can be:
+  - A 3D/4D array (automatically converted to NIfTI)
+  - A single URL string or file path
+  - A Dict with volume options (`:url`, `:colormap`, `:opacity`, etc.)
+  - A Vector of URLs/Dicts for multiple volumes
+- `width::Int=400`: Canvas width in pixels
+- `height::Int=400`: Canvas height in pixels
+- `opts::Tuple=Tuple[]`: Initial options as tuple pairs, e.g. `[("isColorbar", true)]`
+- `methods::Tuple=Tuple[]`: Initial methods to call as tuple pairs, e.g. `[("setCrosshairWidth", 5)]`
+- `ni_args...`: Additional arguments for NIfTI conversion (e.g., `voxel_size=(1,1,1)`)
+
+# Returns
+- `NiivueViewer`: An interactive viewer object
+
+# Examples
+```julia
+# Display a random array
+nv = niivue(rand(50, 50, 20))
+
+# Load from URL
+nv = niivue("https://niivue.github.io/niivue-demo-images/mni152.nii.gz")
+
+# Multiple volumes with options
+volumes = [
+    Dict(:url => "mni152.nii.gz", :colormap => "gray"),
+    Dict(:url => "overlay.nii.gz", :colormap => "red", :opacity => 0.5)
+]
+nv = niivue(volumes)
+
+# With initial settings
+nv = niivue(
+    volumes,
+    opts = [("isColorbar", true), ("backColor", [1, 1, 1, 1])],
+    methods = [("setCrosshairWidth", 5)]
+)
+```
+
+# Interactive Usage
+After creating a viewer, you can modify it interactively:
+
+```julia
+# Call methods
+nv.setCrosshairWidth(10)
+nv.setCrosshairColor([0, 1, 1, 0.5])
+
+# Set options
+nv.isColorbar = true
+nv.backColor = [0.3, 0.3, 0.3, 1]
+
+# Load new volumes
+nv.loadVolumes([Dict(:url => "new_volume.nii.gz")])
+```
+
+See the [NiiVue documentation](https://niivue.com/docs/) for all available methods and options.
+"""
 function niivue(volumes=[]; width=400, height=400, opts=Tuple[], methods=Tuple[], ni_args...)
     if !isempty(volumes)
         volumes = resolve_volumes(volumes; ni_args...)
