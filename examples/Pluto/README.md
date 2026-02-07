@@ -34,6 +34,16 @@ This directory contains interactive [Pluto.jl](https://github.com/fonsp/Pluto.jl
   - Multiple volume overlay
   - Interactive opacity and colormap controls
 
+- **[mosaic.jl](mosaic.jl)** - Mosaic (tiled) slice layouts
+  - Display multiple slices in a grid layout
+  - Customizable mosaic string for flexible arrangements
+  - Useful for creating brain atlas views
+
+- **[layout.jl](layout.jl)** - Custom viewport layouts
+  - Different multiplanar layout modes (auto, column, grid, row)
+  - Interactive layout switching
+  - Flexible workspace organization
+
 ### Visualization Features
 
 - **[colormaps.jl](colormaps.jl)** - Colormap controls and customization
@@ -47,6 +57,11 @@ This directory contains interactive [Pluto.jl](https://github.com/fonsp/Pluto.jl
   - Mesh transparency and x-ray modes
   - Multiple mesh layers
 
+- **[mesh_curvature.jl](mesh_curvature.jl)** - Mesh with curvature overlays
+  - Brain surface with cortical folding patterns
+  - Gyri and sulci visualization
+  - Layer-based mesh rendering
+
 - **[atlas.jl](atlas.jl)** - Brain atlas visualization
   - Anatomical region labeling
   - Atlas overlays
@@ -58,6 +73,16 @@ This directory contains interactive [Pluto.jl](https://github.com/fonsp/Pluto.jl
   - Viewing 3D volumes over time
   - Interactive timepoint navigation
   - fMRI BOLD data visualization
+
+- **[connectome.jl](connectome.jl)** - Brain connectivity visualization
+  - Network nodes and edges
+  - Structural and functional connectivity
+  - Interactive node scaling
+
+- **[drawing.jl](drawing.jl)** - Manual annotation and ROI drawing
+  - Interactive drawing tools
+  - Multiple color labels
+  - Segmentation editing capabilities
 
 ## Julia-Specific Advantages
 

@@ -70,7 +70,7 @@ Niivue.jl provides feature parity with [ipyniivue](https://github.com/niivue/ipy
 - ✅ Multiplanar viewing
 - ✅ Custom rendering options
 
-See the [Examples](@ref) section for Pluto notebook translations of ipyniivue examples.
+See the [Example Gallery](@ref) for a comprehensive showcase of interactive Pluto notebooks, or the [Examples](@ref) section for usage patterns.
 
 ## Why Niivue.jl?
 
@@ -89,6 +89,7 @@ See [Julia-Specific Features](@ref) for details.
 
 ```@contents
 Pages = [
+    "gallery.md",
     "examples.md",
     "julia_features.md",
     "api.md",

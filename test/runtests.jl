@@ -2,6 +2,37 @@ using Niivue
 using Test
 
 @testset "Niivue.jl" begin
+    @testset "Pluto Examples" begin
+        # Test that all Pluto notebooks can be parsed as valid Julia code
+        examples_dir = joinpath(@__DIR__, "..", "examples", "Pluto")
+        pluto_files = filter(f -> endswith(f, ".jl") && f != "README.md", readdir(examples_dir))
+        
+        for file in pluto_files
+            @testset "Parsing $file" begin
+                filepath = joinpath(examples_dir, file)
+                
+                # Test that the file can be read
+                @test isfile(filepath)
+                
+                # Test that the file contains valid Julia syntax
+                code = read(filepath, String)
+                @test !isempty(code)
+                
+                # Test that it's a Pluto notebook (contains Pluto header)
+                @test contains(code, "### A Pluto.jl notebook ###")
+                
+                # Test that the file can be parsed without syntax errors
+                try
+                    Meta.parse("begin\n" * code * "\nend")
+                    @test true
+                catch e
+                    @test false  # Should not throw parsing errors
+                end
+            end
+        end
+    end
+    
+
     @testset "Basic Creation" begin
         # Test creating empty viewer
         nv = niivue()
