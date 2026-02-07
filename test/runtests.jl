@@ -34,9 +34,22 @@ using Test
     
     @testset "Pluto Examples - Execution Test" begin
         # Test that the core Niivue code in examples can execute
-        # This tests validates that the examples don't have runtime errors
+        # This test validates that the examples don't have runtime errors
         examples_dir = joinpath(@__DIR__, "..", "examples", "Pluto")
         pluto_files = filter(f -> endswith(f, ".jl"), readdir(examples_dir))
+        
+        # Helper function to create viewer based on call pattern
+        function try_create_viewer(call_pattern)
+            if contains(call_pattern, "rand(")
+                return niivue(rand(10, 10, 5))
+            elseif contains(call_pattern, "https://")
+                return niivue("https://niivue.github.io/niivue-demo-images/mni152.nii.gz")
+            elseif contains(call_pattern, "Dict(")
+                return niivue([Dict(:url => "https://niivue.github.io/niivue-demo-images/mni152.nii.gz")])
+            else
+                return niivue()
+            end
+        end
         
         for file in pluto_files
             @testset "Executing $file" begin
@@ -56,39 +69,18 @@ using Test
                 
                 if !isempty(niivue_calls)
                     # Test at least one niivue call from the file
-                    # We'll test creation of basic viewers
-                    test_passed = false
+                    viewer_created = false
                     for call in niivue_calls
                         try
-                            # Create a minimal test - just check that we can create viewers
-                            # with the patterns used in the examples
-                            if contains(call, "rand(")
-                                # Test array-based creation
-                                nv = niivue(rand(10, 10, 5))
-                                test_passed = nv isa Niivue.NiivueViewer
-                                break
-                            elseif contains(call, "https://")
-                                # Test URL-based creation
-                                nv = niivue("https://niivue.github.io/niivue-demo-images/mni152.nii.gz")
-                                test_passed = nv isa Niivue.NiivueViewer
-                                break
-                            elseif contains(call, "Dict(")
-                                # Test Dict-based creation
-                                nv = niivue([Dict(:url => "https://niivue.github.io/niivue-demo-images/mni152.nii.gz")])
-                                test_passed = nv isa Niivue.NiivueViewer
-                                break
-                            else
-                                # Test basic creation
-                                nv = niivue()
-                                test_passed = nv isa Niivue.NiivueViewer
-                                break
-                            end
+                            nv = try_create_viewer(call)
+                            viewer_created = nv isa Niivue.NiivueViewer
+                            break  # Success, stop trying
                         catch e
                             # If this pattern fails, try next
                             continue
                         end
                     end
-                    @test test_passed
+                    @test viewer_created
                 else
                     # If no niivue() calls found, skip (might be advanced example)
                     @test_skip "No direct niivue() calls found in $file"
