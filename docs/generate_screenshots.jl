@@ -19,6 +19,7 @@ using Bonito
 
 const GALLERY_DIR = joinpath(@__DIR__, "..", "examples", "gallery")
 const OUTPUT_DIR  = joinpath(@__DIR__, "src", "assets", "gallery")
+const RENDER_WAIT_MS = 5000  # time (ms) to wait for WebGL rendering before capture
 
 mkpath(OUTPUT_DIR)
 
@@ -42,11 +43,12 @@ for file in filter(f -> endswith(f, ".jl"), readdir(GALLERY_DIR))
         js_script = """
         const puppeteer = require('puppeteer');
         (async () => {
+            // --no-sandbox is required when running in containers / CI environments
             const browser = await puppeteer.launch({headless: true, args: ['--no-sandbox']});
             const page = await browser.newPage();
             await page.setViewport({width: 800, height: 600});
             await page.goto('$url', {waitUntil: 'networkidle0', timeout: 30000});
-            await page.waitForTimeout(3000);
+            await page.waitForTimeout($RENDER_WAIT_MS);
             await page.screenshot({path: '$outpath'});
             await browser.close();
         })();
