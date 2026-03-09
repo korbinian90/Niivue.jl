@@ -135,7 +135,7 @@ using Test
         nv.events[] = Dict{String, Any}("event" => "unknown_event")
         @test received[]["event"] == "location_change"  # still the old value
 
-        # Test drag_release event dispatch
+        # Test drag_release event with full structure matching JS output
         drag_data = Ref{Any}(nothing)
         on(nv, :drag_release) do data
             drag_data[] = data
@@ -143,13 +143,25 @@ using Test
         nv.events[] = Dict{String, Any}(
             "event" => "drag_release",
             "tile_idx" => 1,
+            "ax_cor_sag" => 2,
             "mm_length" => 42.5,
             "vox_start" => [10, 20, 30],
             "vox_end" => [40, 50, 60]
         )
+        @test drag_data[]["event"] == "drag_release"
         @test drag_data[]["tile_idx"] == 1
+        @test drag_data[]["ax_cor_sag"] == 2
         @test drag_data[]["mm_length"] == 42.5
         @test drag_data[]["vox_start"] == [10, 20, 30]
+        @test drag_data[]["vox_end"] == [40, 50, 60]
+
+        # Test frame_change event
+        frame_data = Ref{Any}(nothing)
+        on(nv, :frame_change) do data
+            frame_data[] = data
+        end
+        nv.events[] = Dict{String, Any}("event" => "frame_change", "frame" => 5)
+        @test frame_data[]["frame"] == 5
     end
 
     @testset "Multiple event callbacks" begin

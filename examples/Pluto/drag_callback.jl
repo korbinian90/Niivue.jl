@@ -56,16 +56,16 @@ md"""
 ## Controls
 
 **Drag Mode:** $(@bind drag_mode Select([
-	"contrast" => "1",
-	"measurement" => "2",
-	"pan/zoom" => "3",
-	"slicer3D" => "4",
-], default="2"))
+	"Contrast" => 1,
+	"Measurement" => 2,
+	"Pan/Zoom" => 3,
+	"Slicer 3D" => 4,
+], default=2))
 """
 
 # ╔═╡ f5g6h7i8-d8e0-11ef-1234-0123456789ab
 # Apply drag mode (NiiVue drag modes: 1=contrast, 2=measurement, 3=pan, 4=slicer3D)
-nv.dragMode = parse(Int, drag_mode)
+nv.dragMode = drag_mode
 
 # ╔═╡ g6h7i8j9-d8e0-11ef-1234-0123456789ab
 md"""
@@ -90,8 +90,8 @@ end
 begin
 	drag_info = Observable("Drag on the image (in measurement mode) to measure")
 	on(nv, :drag_release) do data
-		tile = get(data, "tile_idx", -1)
-		if tile < 0
+		tile = get(data, "tile_idx", nothing)
+		if tile === nothing
 			drag_info[] = "Invalid drag"
 		else
 			len = round(get(data, "mm_length", 0); digits=1)

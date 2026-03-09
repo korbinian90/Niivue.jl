@@ -17,7 +17,7 @@ function niivue(volumes=[]; width=400, height=400, opts=Tuple[], methods=Tuple[]
     
     obs_methods = Observable(["setCrosshairWidth", 5])
     obs_opts = Observable(["isColorbar", false])
-    obs_events = Observable{Any}(Dict{String, Any}("event" => "init"))
+    obs_events = Observable{Any}(Dict{String, Any}())
     callbacks = Dict{String, Vector{Any}}()
 
     # Dispatch events from JS to registered Julia callbacks
@@ -75,8 +75,8 @@ function niivue(volumes=[]; width=400, height=400, opts=Tuple[], methods=Tuple[]
             nv.onDragRelease = (data) => {
                 $obs_events.notify({
                     event: "drag_release",
-                    tile_idx: data.tileIdx != null ? data.tileIdx : -1,
-                    ax_cor_sag: data.axCorSag != null ? data.axCorSag : -1,
+                    tile_idx: data.tileIdx != null ? data.tileIdx : null,
+                    ax_cor_sag: data.axCorSag != null ? data.axCorSag : null,
                     mm_length: data.mmLength || 0,
                     vox_start: data.voxStart || [0,0,0],
                     vox_end: data.voxEnd || [0,0,0]
