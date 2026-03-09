@@ -91,7 +91,7 @@ using Test
     end
 
     @testset "Example files parse" begin
-        for dir in ["Pluto", "vscode", "scripts"]
+        for dir in ["Pluto", "vscode", "scripts", "gallery"]
             path = joinpath(@__DIR__, "..", "examples", dir)
             isdir(path) || continue
             for f in filter(f -> endswith(f, ".jl"), readdir(path))
