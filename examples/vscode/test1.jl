@@ -31,4 +31,4 @@ c = nv1.colormaps()
 ## Use Electron display instead
 # in vscode: ctr+shift+p -> Julia: Disable Plot Pane
 using Electron
-Electron.use_electron_display(devtools=true)
+use_electron_display(devtools=true)

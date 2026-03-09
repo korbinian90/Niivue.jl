@@ -4,71 +4,14 @@ using Bonito, NIfTI
 
 export niivue
 
-"""
-    niivue(volumes=[]; width=400, height=400, opts=Tuple[], methods=Tuple[], ni_args...)
-
-Create an interactive NiiVue viewer for neuroimaging data.
-
-# Arguments
-- `volumes`: Volume(s) to display. Can be:
-  - A 3D/4D array (automatically converted to NIfTI)
-  - A single URL string or file path
-  - A Dict with volume options (`:url`, `:colormap`, `:opacity`, etc.)
-  - A Vector of URLs/Dicts for multiple volumes
-- `width::Int=400`: Canvas width in pixels
-- `height::Int=400`: Canvas height in pixels
-- `opts::Tuple=Tuple[]`: Initial options as tuple pairs, e.g. `[("isColorbar", true)]`
-- `methods::Tuple=Tuple[]`: Initial methods to call as tuple pairs, e.g. `[("setCrosshairWidth", 5)]`
-- `ni_args...`: Additional arguments for NIfTI conversion (e.g., `voxel_size=(1,1,1)`)
-
-# Returns
-- `NiivueViewer`: An interactive viewer object
-
-# Examples
-```julia
-# Display a random array
-nv = niivue(rand(50, 50, 20))
-
-# Load from URL
-nv = niivue("https://niivue.github.io/niivue-demo-images/mni152.nii.gz")
-
-# Multiple volumes with options
-volumes = [
-    Dict(:url => "mni152.nii.gz", :colormap => "gray"),
-    Dict(:url => "overlay.nii.gz", :colormap => "red", :opacity => 0.5)
-]
-nv = niivue(volumes)
-
-# With initial settings
-nv = niivue(
-    volumes,
-    opts = [("isColorbar", true), ("backColor", [1, 1, 1, 1])],
-    methods = [("setCrosshairWidth", 5)]
-)
-```
-
-# Interactive Usage
-After creating a viewer, you can modify it interactively:
-
-```julia
-# Call methods
-nv.setCrosshairWidth(10)
-nv.setCrosshairColor([0, 1, 1, 0.5])
-
-# Set options
-nv.isColorbar = true
-nv.backColor = [0.3, 0.3, 0.3, 1]
-
-# Load new volumes
-nv.loadVolumes([Dict(:url => "new_volume.nii.gz")])
-```
-
-See the [NiiVue documentation](https://niivue.com/docs/) for all available methods and options.
-"""
-function niivue(volumes=[]; width=400, height=400, opts=Tuple[], methods=Tuple[], ni_args...)
+function niivue(volumes=[]; width=400, height=400, opts=Tuple[], methods=Tuple[], meshes=[], ni_args...)
     if !isempty(volumes)
         volumes = resolve_volumes(volumes; ni_args...)
         methods = vcat(methods, ("loadVolumes", volumes))
+    end
+    if !isempty(meshes)
+        meshes = resolve_meshes(meshes)
+        methods = vcat(methods, ("loadMeshes", meshes))
     end
     
     obs_methods = Observable(["setCrosshairWidth", 5])
@@ -94,6 +37,8 @@ function niivue(volumes=[]; width=400, height=400, opts=Tuple[], methods=Tuple[]
                     if (method === "loadVolumes") {
                         fix_volumes(arg)
                         nv.loadVolumes(arg)
+                    } else if (method === "loadMeshes") {
+                        nv.loadMeshes(arg)
                     } else {
                         nv[method](arg)
                     }
@@ -130,19 +75,16 @@ function resolve_volumes(volumes; ni_args...)
     if !(volumes isa AbstractVector)
         volumes = [volumes]
     end
-    # convert strings to Dict{Symbol, Any}(:url => v)
     volumes = [(!(v isa Dict) ? Dict{Symbol, Any}(:url => v) : v) for v in volumes]
-
-    # convert to Dict{Symbol, Any}
     volumes = [Dict{Symbol, Any}(k => v for (k, v) in d) for d in volumes]
 
     for v in volumes
-        if is_local_file(v[:url]) # read local files
+        if is_local_file(v[:url])
             if !haskey(v, :name)
                 v[:name] = v[:url]
             end
             v[:url] = read(v[:url])
-        elseif v[:url] isa AbstractArray && ndims(v[:url]) > 1 # convert array to NIfTI
+        elseif v[:url] isa AbstractArray && ndims(v[:url]) > 1
             if !haskey(v, :name)
                 v[:name] = "Image.nii"
             end
@@ -154,19 +96,27 @@ function resolve_volumes(volumes; ni_args...)
     return volumes
 end
 
+function resolve_meshes(meshes)
+    if !(meshes isa AbstractVector)
+        meshes = [meshes]
+    end
+    meshes = [(!(m isa Dict) ? Dict{Symbol, Any}(:url => m) : m) for m in meshes]
+    return [Dict{Symbol, Any}(k => v for (k, v) in d) for d in meshes]
+end
+
 function is_local_file(url)
     return url isa String && !startswith(url, "http")
 end
 
-# Overload the call operator to allow calling nv("setCrosshairWidth", 5)
 function (nv::NiivueViewer)(method::String, arg)
     nv.methods[] = [method, arg]
 end
 
-# Overload dot syntax for e.g. nv.setCrosshairWidth(5)
 function Base.getproperty(nv::NiivueViewer, name::Symbol)
     if name == :loadVolumes
         return vols -> nv.methods[] = ["loadVolumes", resolve_volumes(vols)]
+    elseif name == :loadMeshes
+        return meshes -> nv.methods[] = ["loadMeshes", resolve_meshes(meshes)]
     elseif hasfield(typeof(nv), name)
         return getfield(nv, name)
     else
@@ -174,7 +124,6 @@ function Base.getproperty(nv::NiivueViewer, name::Symbol)
     end
 end
 
-# Overload dot syntax for e.g. nv.isColorbar = true
 function Base.setproperty!(nv::NiivueViewer, name::Symbol, value)
     if hasfield(typeof(nv), name)
         setfield!(nv, name, value)

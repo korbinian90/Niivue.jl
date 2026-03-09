@@ -2,198 +2,103 @@ using Niivue
 using Test
 
 @testset "Niivue.jl" begin
-    @testset "Pluto Examples - Syntax Check" begin
-        # Test that all Pluto notebooks can be parsed as valid Julia code
-        examples_dir = joinpath(@__DIR__, "..", "examples", "Pluto")
-        pluto_files = filter(f -> endswith(f, ".jl"), readdir(examples_dir))
-        
-        for file in pluto_files
-            @testset "Parsing $file" begin
-                filepath = joinpath(examples_dir, file)
-                
-                # Test that the file can be read
-                @test isfile(filepath)
-                
-                # Test that the file contains valid Julia syntax
-                code = read(filepath, String)
-                @test !isempty(code)
-                
-                # Test that it's a Pluto notebook (contains Pluto header)
-                @test contains(code, "### A Pluto.jl notebook ###")
-                
-                # Test that the file can be parsed without syntax errors
-                try
-                    Meta.parse("begin\n" * code * "\nend")
-                    @test true
-                catch e
-                    @test false  # Should not throw parsing errors
-                end
-            end
-        end
+    @testset "Viewer creation" begin
+        @test niivue() isa Niivue.NiivueViewer
+        @test niivue(width=800, height=600) isa Niivue.NiivueViewer
     end
-    
-    @testset "Pluto Examples - Execution Test" begin
-        # Test that the core Niivue code in examples can execute
-        # This test validates that the examples don't have runtime errors
-        examples_dir = joinpath(@__DIR__, "..", "examples", "Pluto")
-        pluto_files = filter(f -> endswith(f, ".jl"), readdir(examples_dir))
-        
-        # Helper function to create viewer based on call pattern
-        function try_create_viewer(call_pattern)
-            if contains(call_pattern, "rand(")
-                return niivue(rand(10, 10, 5))
-            elseif contains(call_pattern, "https://")
-                return niivue("https://niivue.github.io/niivue-demo-images/mni152.nii.gz")
-            elseif contains(call_pattern, "Dict(")
-                return niivue([Dict(:url => "https://niivue.github.io/niivue-demo-images/mni152.nii.gz")])
-            else
-                return niivue()
-            end
-        end
-        
-        for file in pluto_files
-            @testset "Executing $file" begin
-                filepath = joinpath(examples_dir, file)
-                code = read(filepath, String)
-                
-                # Extract only niivue() calls and basic Niivue operations
-                # This is a smoke test to ensure the core functionality works
-                niivue_calls = String[]
-                for line in split(code, '\n')
-                    # Find lines that create niivue instances or call methods
-                    if contains(line, "niivue(") && !contains(line, "#")
-                        # Extract the niivue call
-                        push!(niivue_calls, strip(line))
-                    end
-                end
-                
-                if !isempty(niivue_calls)
-                    # Test at least one niivue call from the file
-                    viewer_created = false
-                    for call in niivue_calls
-                        try
-                            nv = try_create_viewer(call)
-                            viewer_created = nv isa Niivue.NiivueViewer
-                            break  # Success, stop trying
-                        catch e
-                            # If this pattern fails, try next
-                            continue
-                        end
-                    end
-                    @test viewer_created
-                else
-                    # If no niivue() calls found, skip (might be advanced example)
-                    @test_skip "No direct niivue() calls found in $file"
-                end
-            end
-        end
-    end
-    
 
-    @testset "Basic Creation" begin
-        # Test creating empty viewer
-        nv = niivue()
-        @test nv isa Niivue.NiivueViewer
-        @test hasfield(typeof(nv), :app)
-        @test hasfield(typeof(nv), :methods)
-        @test hasfield(typeof(nv), :opts)
-    end
-    
-    @testset "Array Input" begin
-        # Test with 3D array
-        arr3d = rand(10, 10, 5)
-        nv = niivue(arr3d)
-        @test nv isa Niivue.NiivueViewer
-        
-        # Test with 4D array
-        arr4d = rand(10, 10, 5, 3)
-        nv = niivue(arr4d)
-        @test nv isa Niivue.NiivueViewer
-    end
-    
-    @testset "Volume Configuration" begin
-        # Test with URL string
+    @testset "Volume inputs" begin
+        @test niivue(rand(10, 10, 5)) isa Niivue.NiivueViewer
+        @test niivue(rand(10, 10, 5, 3)) isa Niivue.NiivueViewer
+        @test niivue(rand(Float32, 10, 10, 5)) isa Niivue.NiivueViewer
+        @test niivue(rand(Int16, 10, 10, 5)) isa Niivue.NiivueViewer
+
         url = "https://niivue.github.io/niivue-demo-images/mni152.nii.gz"
-        nv = niivue(url)
-        @test nv isa Niivue.NiivueViewer
-        
-        # Test with Dict configuration
-        vol_dict = Dict(
-            :url => url,
-            :colormap => "gray",
-            :opacity => 0.5
-        )
-        nv = niivue(vol_dict)
-        @test nv isa Niivue.NiivueViewer
-        
-        # Test with multiple volumes
-        volumes = [
-            Dict(:url => url, :colormap => "gray"),
-            Dict(:url => url, :colormap => "red", :opacity => 0.5)
-        ]
-        nv = niivue(volumes)
-        @test nv isa Niivue.NiivueViewer
+        @test niivue(url) isa Niivue.NiivueViewer
+        @test niivue([url, url]) isa Niivue.NiivueViewer
+        @test niivue(Dict(:url => url, :colormap => "gray")) isa Niivue.NiivueViewer
+        @test niivue([Dict(:url => url), url]) isa Niivue.NiivueViewer
     end
-    
-    @testset "Options and Methods" begin
-        # Test with initial options
-        nv = niivue(
-            opts = [("isColorbar", true), ("backColor", [1, 1, 1, 1])]
-        )
-        @test nv isa Niivue.NiivueViewer
-        
-        # Test with initial methods
-        nv = niivue(
-            methods = [("setCrosshairWidth", 5)]
-        )
-        @test nv isa Niivue.NiivueViewer
+
+    @testset "Mesh inputs" begin
+        mesh = "https://niivue.github.io/niivue-demo-images/BrainMesh_ICBM152.lh.mz3"
+        @test niivue(meshes=[Dict(:url => mesh)]) isa Niivue.NiivueViewer
+        @test niivue(meshes=[mesh]) isa Niivue.NiivueViewer
     end
-    
-    @testset "Canvas Size" begin
-        # Test custom canvas size
-        nv = niivue(width=800, height=600)
-        @test nv isa Niivue.NiivueViewer
+
+    @testset "Options and methods" begin
+        @test niivue(opts=[("isColorbar", true)]) isa Niivue.NiivueViewer
+        @test niivue(methods=[("setCrosshairWidth", 5)]) isa Niivue.NiivueViewer
     end
-    
-    @testset "Helper Functions" begin
-        # Test is_local_file
-        @test Niivue.is_local_file("local_file.nii.gz") == true
-        @test Niivue.is_local_file("https://example.com/file.nii.gz") == false
-        @test Niivue.is_local_file("http://example.com/file.nii.gz") == false
-        
-        # Test resolve_volumes with array
-        arr = rand(10, 10, 5)
-        volumes = Niivue.resolve_volumes(arr)
-        @test volumes isa Vector
-        @test length(volumes) == 1
-        @test volumes[1] isa Dict
-        @test haskey(volumes[1], :url)
-        @test haskey(volumes[1], :name)
-        
-        # Test resolve_volumes with string URL
+
+    @testset "Dynamic method calls" begin
+        nv = niivue()
+        nv.setCrosshairWidth(5)
+        @test nv.methods[] == ["setCrosshairWidth", 5]
+
+        nv.setSliceType(3)
+        @test nv.methods[] == ["setSliceType", 3]
+
+        nv("setGamma", 1.5)
+        @test nv.methods[] == ["setGamma", 1.5]
+    end
+
+    @testset "Dynamic property setting" begin
+        nv = niivue()
+        nv.isColorbar = true
+        @test nv.opts[] == ["isColorbar", true]
+
+        nv.backColor = [0, 0, 0, 1]
+        @test nv.opts[] == ["backColor", [0, 0, 0, 1]]
+    end
+
+    @testset "Load after creation" begin
+        nv = niivue()
+        url = "https://niivue.github.io/niivue-demo-images/mni152.nii.gz"
+
+        nv.loadVolumes([url])
+        @test nv.methods[][1] == "loadVolumes"
+        @test nv.methods[][2][1][:url] == url
+
+        mesh = "https://niivue.github.io/niivue-demo-images/BrainMesh_ICBM152.lh.mz3"
+        nv.loadMeshes([mesh])
+        @test nv.methods[][1] == "loadMeshes"
+        @test nv.methods[][2][1][:url] == mesh
+    end
+
+    @testset "resolve_volumes" begin
         url = "https://example.com/file.nii.gz"
-        volumes = Niivue.resolve_volumes(url)
-        @test volumes isa Vector
-        @test length(volumes) == 1
-        @test volumes[1][:url] == url
-        
-        # Test resolve_volumes with Dict
-        vol_dict = Dict(:url => url, :colormap => "gray")
-        volumes = Niivue.resolve_volumes(vol_dict)
-        @test volumes isa Vector
-        @test length(volumes) == 1
-        @test volumes[1][:url] == url
-        @test volumes[1][:colormap] == "gray"
-        
-        # Test resolve_volumes with multiple volumes
-        multi = [
-            Dict(:url => url, :colormap => "gray"),
-            url
-        ]
-        volumes = Niivue.resolve_volumes(multi)
-        @test volumes isa Vector
-        @test length(volumes) == 2
-        @test all(v isa Dict for v in volumes)
+        @test Niivue.resolve_volumes(url)[1][:url] == url
+        @test Niivue.resolve_volumes(Dict(:url => url))[1][:url] == url
+        @test length(Niivue.resolve_volumes([url, url])) == 2
+
+        arr = rand(10, 10, 5)
+        v = Niivue.resolve_volumes(arr)[1]
+        @test v[:url] isa AbstractVector{UInt8}
+        @test v[:name] == "Image.nii"
+    end
+
+    @testset "resolve_meshes" begin
+        mesh = "https://example.com/brain.mz3"
+        @test Niivue.resolve_meshes(mesh)[1][:url] == mesh
+        @test length(Niivue.resolve_meshes([mesh, mesh])) == 2
+    end
+
+    @testset "is_local_file" begin
+        @test Niivue.is_local_file("file.nii.gz") == true
+        @test Niivue.is_local_file("https://x.com/f.nii") == false
+        @test Niivue.is_local_file("http://x.com/f.nii") == false
+    end
+
+    @testset "Example files parse" begin
+        for dir in ["Pluto", "vscode", "scripts"]
+            path = joinpath(@__DIR__, "..", "examples", dir)
+            isdir(path) || continue
+            for f in filter(f -> endswith(f, ".jl"), readdir(path))
+                code = read(joinpath(path, f), String)
+                @test !isempty(code)
+                @test try Meta.parse("begin\n$code\nend"); true catch; false end
+            end
+        end
     end
 end
-
