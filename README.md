@@ -57,6 +57,30 @@ nv.isColorbar = true
 
 The [methods](https://niivue.com/docs/api/niivue/classes/Niivue#methods) (e.g. `nv.setCrosshairWidth(5)`) and [options](https://niivue.com/docs/api/nvdocument/type-aliases/NVConfigOptions) (e.g. `nv.isColorbar = true`) can be found in the [niivue javascript documentation](https://niivue.com/docs/).
 
+## Bidirectional Event Callbacks
+
+Register Julia callbacks for NiiVue events. When the user interacts with the viewer,
+events are sent back from JavaScript to Julia via Bonito's Observable system.
+
+```julia
+using Niivue, Observables
+
+nv = niivue("https://niivue.github.io/niivue-demo-images/mni152.nii.gz")
+
+# Track crosshair position
+on(nv, :location_change) do data
+    println("Position: ", data["string"])
+end
+
+# Track drag measurements
+on(nv, :drag_release) do data
+    println("Length: ", data["mm_length"], "mm")
+end
+```
+
+Available events: `:location_change`, `:drag_release`, `:image_loaded`, `:frame_change`,
+`:clip_plane_change`, `:intensity_change`, `:volume_updated`.
+
 ## Electron Display
 
 To use an Electron display instead of the browser, add in the beginning
@@ -108,7 +132,6 @@ cmaps = Niivue.Bonito.evaljs_value(nv.app.session.x, js_return)
 
 - use niivue-vscode as alternative pre-configured viewer
 - Support access to volumes (e.g. `nv.volumes[1].opacity = 0.3`) and functions with return values (e.g. `cmaps = nv.colormaps()`) directly from julia
-- observable in julia that stores the crosshair location
 
 ## Acknowledgements
 
