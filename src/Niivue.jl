@@ -1,6 +1,7 @@
 module Niivue
 
 using Bonito, NIfTI
+import Observables
 
 export niivue
 
@@ -16,6 +17,16 @@ function niivue(volumes=[]; width=400, height=400, opts=Tuple[], methods=Tuple[]
     
     obs_methods = Observable(["setCrosshairWidth", 5])
     obs_opts = Observable(["isColorbar", false])
+    obs_events = Observable{Any}(Dict{String, Any}("event" => "init"))
+    callbacks = Dict{String, Vector{Any}}()
+
+    # Dispatch events from JS to registered Julia callbacks
+    Observables.on(obs_events) do val
+        name = get(val, "event", "")
+        for cb in get(callbacks, name, Any[])
+            cb(val)
+        end
+    end
 
     nv_dom = DOM.canvas(id="gl"; width, height)
 
@@ -56,19 +67,75 @@ function niivue(volumes=[]; width=400, height=400, opts=Tuple[], methods=Tuple[]
             nv.updateGLVolume()
             Bonito.onany([$obs_methods], nv_methods)
             Bonito.onany([$obs_opts], nv_opts)
+
+            // Bidirectional: JS events → Julia via Observable
+            nv.onLocationChange = (data) => {
+                $obs_events.notify({event: "location_change", string: data.string || ""})
+            }
+            nv.onDragRelease = (data) => {
+                $obs_events.notify({
+                    event: "drag_release",
+                    tile_idx: data.tileIdx != null ? data.tileIdx : -1,
+                    ax_cor_sag: data.axCorSag != null ? data.axCorSag : -1,
+                    mm_length: data.mmLength || 0,
+                    vox_start: data.voxStart || [0,0,0],
+                    vox_end: data.voxEnd || [0,0,0]
+                })
+            }
+            nv.onImageLoaded = () => {
+                $obs_events.notify({event: "image_loaded"})
+            }
+            nv.onFrameChange = (volume, idx) => {
+                $obs_events.notify({event: "frame_change", frame: idx})
+            }
+            nv.onClipPlaneChange = (cp) => {
+                $obs_events.notify({event: "clip_plane_change", clip_plane: Array.from(cp)})
+            }
+            nv.onIntensityChange = (data) => {
+                $obs_events.notify({event: "intensity_change", string: data.string || ""})
+            }
+            nv.onVolumeUpdated = () => {
+                $obs_events.notify({event: "volume_updated"})
+            }
         })
     """
 
     app = App() do session
         DOM.div(nv_dom, evaljs(session, js_eval))
     end
-    return NiivueViewer(app, obs_methods, obs_opts)
+    return NiivueViewer(app, obs_methods, obs_opts, obs_events, callbacks)
 end
 
 struct NiivueViewer
     app::App
     methods::Observable
     opts::Observable
+    events::Observable{Any}
+    callbacks::Dict{String, Vector{Any}}
+end
+
+"""
+    on(callback, nv::NiivueViewer, event::Symbol)
+
+Register a Julia callback for a NiiVue event. Available events:
+`:location_change`, `:drag_release`, `:image_loaded`, `:frame_change`,
+`:clip_plane_change`, `:intensity_change`, `:volume_updated`.
+
+# Example
+```julia
+nv = niivue("https://niivue.github.io/niivue-demo-images/mni152.nii.gz")
+on(nv, :location_change) do data
+    println("Crosshair: ", data["string"])
+end
+```
+"""
+function Observables.on(f::Function, nv::NiivueViewer, event::Symbol)
+    name = string(event)
+    if !haskey(nv.callbacks, name)
+        nv.callbacks[name] = Any[]
+    end
+    push!(nv.callbacks[name], f)
+    return nothing
 end
 
 function resolve_volumes(volumes; ni_args...)
