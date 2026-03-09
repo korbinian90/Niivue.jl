@@ -2,12 +2,16 @@ module Niivue
 
 using Bonito, NIfTI
 
-export niivue, use_electron_display
+export niivue
 
-function niivue(volumes=[]; width=400, height=400, opts=Tuple[], methods=Tuple[], ni_args...)
+function niivue(volumes=[]; width=400, height=400, opts=Tuple[], methods=Tuple[], meshes=[], ni_args...)
     if !isempty(volumes)
         volumes = resolve_volumes(volumes; ni_args...)
         methods = vcat(methods, ("loadVolumes", volumes))
+    end
+    if !isempty(meshes)
+        meshes = resolve_meshes(meshes)
+        methods = vcat(methods, ("loadMeshes", meshes))
     end
     
     obs_methods = Observable(["setCrosshairWidth", 5])
@@ -33,6 +37,8 @@ function niivue(volumes=[]; width=400, height=400, opts=Tuple[], methods=Tuple[]
                     if (method === "loadVolumes") {
                         fix_volumes(arg)
                         nv.loadVolumes(arg)
+                    } else if (method === "loadMeshes") {
+                        nv.loadMeshes(arg)
                     } else {
                         nv[method](arg)
                     }
@@ -69,19 +75,16 @@ function resolve_volumes(volumes; ni_args...)
     if !(volumes isa AbstractVector)
         volumes = [volumes]
     end
-    # convert strings to Dict{Symbol, Any}(:url => v)
     volumes = [(!(v isa Dict) ? Dict{Symbol, Any}(:url => v) : v) for v in volumes]
-
-    # convert to Dict{Symbol, Any}
     volumes = [Dict{Symbol, Any}(k => v for (k, v) in d) for d in volumes]
 
     for v in volumes
-        if is_local_file(v[:url]) # read local files
+        if is_local_file(v[:url])
             if !haskey(v, :name)
                 v[:name] = v[:url]
             end
             v[:url] = read(v[:url])
-        elseif v[:url] isa AbstractArray && ndims(v[:url]) > 1 # convert array to NIfTI
+        elseif v[:url] isa AbstractArray && ndims(v[:url]) > 1
             if !haskey(v, :name)
                 v[:name] = "Image.nii"
             end
@@ -93,19 +96,27 @@ function resolve_volumes(volumes; ni_args...)
     return volumes
 end
 
+function resolve_meshes(meshes)
+    if !(meshes isa AbstractVector)
+        meshes = [meshes]
+    end
+    meshes = [(!(m isa Dict) ? Dict{Symbol, Any}(:url => m) : m) for m in meshes]
+    return [Dict{Symbol, Any}(k => v for (k, v) in d) for d in meshes]
+end
+
 function is_local_file(url)
     return url isa String && !startswith(url, "http")
 end
 
-# Overload the call operator to allow calling nv("setCrosshairWidth", 5)
 function (nv::NiivueViewer)(method::String, arg)
     nv.methods[] = [method, arg]
 end
 
-# Overload dot syntax for e.g. nv.setCrosshairWidth(5)
 function Base.getproperty(nv::NiivueViewer, name::Symbol)
     if name == :loadVolumes
         return vols -> nv.methods[] = ["loadVolumes", resolve_volumes(vols)]
+    elseif name == :loadMeshes
+        return meshes -> nv.methods[] = ["loadMeshes", resolve_meshes(meshes)]
     elseif hasfield(typeof(nv), name)
         return getfield(nv, name)
     else
@@ -113,7 +124,6 @@ function Base.getproperty(nv::NiivueViewer, name::Symbol)
     end
 end
 
-# Overload dot syntax for e.g. nv.isColorbar = true
 function Base.setproperty!(nv::NiivueViewer, name::Symbol, value)
     if hasfield(typeof(nv), name)
         setfield!(nv, name, value)
