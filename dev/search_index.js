@@ -1,3 +1,3 @@
 var documenterSearchIndex = {"docs":
-[{"location":"#Niivue","page":"Home","title":"Niivue","text":"Documentation for Niivue.\n\n","category":"section"}]
+[{"category":"section","location":"#Niivue","page":"Home","text":"Documentation for Niivue.\n\n","title":"Niivue"}]
 }
