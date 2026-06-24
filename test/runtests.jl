@@ -1,4 +1,5 @@
 using Niivue
+using Observables: on, Observable
 using Test
 
 @testset "Niivue.jl" begin
@@ -88,6 +89,93 @@ using Test
         @test Niivue.is_local_file("file.nii.gz") == true
         @test Niivue.is_local_file("https://x.com/f.nii") == false
         @test Niivue.is_local_file("http://x.com/f.nii") == false
+    end
+
+    @testset "Event callback registration" begin
+        nv = niivue()
+        @test nv.events isa Observable
+        @test nv.callbacks isa Dict
+
+        # Register a callback
+        received = Ref{Any}(nothing)
+        on(nv, :location_change) do data
+            received[] = data
+        end
+        @test haskey(nv.callbacks, "location_change")
+        @test length(nv.callbacks["location_change"]) == 1
+
+        # Register a second callback for the same event
+        received2 = Ref{Any}(nothing)
+        on(nv, :location_change) do data
+            received2[] = data
+        end
+        @test length(nv.callbacks["location_change"]) == 2
+
+        # Register a callback for a different event
+        on(nv, :drag_release) do data end
+        @test haskey(nv.callbacks, "drag_release")
+        @test length(nv.callbacks["drag_release"]) == 1
+    end
+
+    @testset "Event dispatch" begin
+        nv = niivue()
+
+        received = Ref{Any}(nothing)
+        on(nv, :location_change) do data
+            received[] = data
+        end
+
+        # Simulate an event from JS by updating the events Observable
+        nv.events[] = Dict{String, Any}("event" => "location_change", "string" => "test location")
+        @test received[] !== nothing
+        @test received[]["string"] == "test location"
+        @test received[]["event"] == "location_change"
+
+        # Events for unregistered types should not error
+        nv.events[] = Dict{String, Any}("event" => "unknown_event")
+        @test received[]["event"] == "location_change"  # still the old value
+
+        # Test drag_release event with full structure matching JS output
+        drag_data = Ref{Any}(nothing)
+        on(nv, :drag_release) do data
+            drag_data[] = data
+        end
+        nv.events[] = Dict{String, Any}(
+            "event" => "drag_release",
+            "tile_idx" => 1,
+            "ax_cor_sag" => 2,
+            "mm_length" => 42.5,
+            "vox_start" => [10, 20, 30],
+            "vox_end" => [40, 50, 60]
+        )
+        @test drag_data[]["event"] == "drag_release"
+        @test drag_data[]["tile_idx"] == 1
+        @test drag_data[]["ax_cor_sag"] == 2
+        @test drag_data[]["mm_length"] == 42.5
+        @test drag_data[]["vox_start"] == [10, 20, 30]
+        @test drag_data[]["vox_end"] == [40, 50, 60]
+
+        # Test frame_change event
+        frame_data = Ref{Any}(nothing)
+        on(nv, :frame_change) do data
+            frame_data[] = data
+        end
+        nv.events[] = Dict{String, Any}("event" => "frame_change", "frame" => 5)
+        @test frame_data[]["frame"] == 5
+    end
+
+    @testset "Multiple event callbacks" begin
+        nv = niivue()
+        count = Ref(0)
+        on(nv, :image_loaded) do data
+            count[] += 1
+        end
+        on(nv, :image_loaded) do data
+            count[] += 10
+        end
+
+        nv.events[] = Dict{String, Any}("event" => "image_loaded")
+        @test count[] == 11
     end
 
     @testset "Example files parse" begin
