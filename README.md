@@ -70,7 +70,7 @@ In vscode, by default the plot pane is used. To use the Electron display, deacti
 
 ## Examples
 
-Have a look at the 'examples' subfolder.
+Have a look at the [Gallery](https://korbinian90.github.io/Niivue.jl/dev/gallery/) for visual examples with code, or browse the [`examples/`](examples/) folder directly.
 
 ## Hacking
 
