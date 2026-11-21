@@ -1,5 +1,7 @@
 # Niivue
 
+**Research use only. Not a medical device. Not intended for diagnosis, treatment or clinical decisions.**
+
 [![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://korbinian90.github.io/Niivue.jl/stable/)
 [![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://korbinian90.github.io/Niivue.jl/dev/)
 [![Build Status](https://github.com/korbinian90/Niivue.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/korbinian90/Niivue.jl/actions/workflows/CI.yml?query=branch%3Amain)
